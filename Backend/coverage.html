@@ -1,0 +1,1921 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>handlers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">GoTransact/apps/accounts/handlers/login_handler.go (0.0%)</option>
+				
+				<option value="file1">GoTransact/apps/accounts/handlers/logout_handler.go (0.0%)</option>
+				
+				<option value="file2">GoTransact/apps/accounts/handlers/signUp_handler.go (0.0%)</option>
+				
+				<option value="file3">GoTransact/apps/accounts/log.go (87.5%)</option>
+				
+				<option value="file4">GoTransact/apps/accounts/test/testDB_setup.go (71.4%)</option>
+				
+				<option value="file5">GoTransact/apps/accounts/utils.go (69.6%)</option>
+				
+				<option value="file6">GoTransact/apps/transaction/handlers/confirmPayment_handler.go (0.0%)</option>
+				
+				<option value="file7">GoTransact/apps/transaction/handlers/paymentRequest_handler.go (0.0%)</option>
+				
+				<option value="file8">GoTransact/apps/transaction/log.go (87.5%)</option>
+				
+				<option value="file9">GoTransact/apps/transaction/test/testDB_setup.go (76.5%)</option>
+				
+				<option value="file10">GoTransact/apps/transaction/utils.go (62.7%)</option>
+				
+				<option value="file11">GoTransact/config/env.go (90.0%)</option>
+				
+				<option value="file12">GoTransact/docs/docs.go (0.0%)</option>
+				
+				<option value="file13">GoTransact/main.go (0.0%)</option>
+				
+				<option value="file14">GoTransact/middlewares/auth_middleware.go (0.0%)</option>
+				
+				<option value="file15">GoTransact/pkg/db/setupDB.go (80.0%)</option>
+				
+				<option value="file16">GoTransact/router/Router2.go (0.0%)</option>
+				
+				<option value="file17">GoTransact/router/router.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package handlers
+
+import (
+        // "GoTransact/apps/accounts/functions"
+        // "GoTransact/apps/accounts/utils"
+        utils "GoTransact/apps/accounts"
+        basemodels "GoTransact/apps/base"
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+        "github.com/sirupsen/logrus"
+)
+
+// @BasePath /api
+// @Summary                         Login
+// @Description                 User login
+// @Tags                                 Auth
+// @Accept                                 json
+// @Produce                         json
+// @Param                                 loginInput body   utils.LoginInput true "Login input"
+// @in                                         header
+// @Success                         200 {object} basemodels.Response
+// @Failure                         400 {object} basemodels.Response
+// @Failure                         401 {object} basemodels.Response
+// @Router                                 /login [post]
+func Login_handler(c *gin.Context) <span class="cov0" title="0">{
+
+        utils.InfoLogger.WithFields(logrus.Fields{
+                "method": c.Request.Method,
+                "url":    c.Request.URL.String(),
+        }).Info("Login Request received")
+
+        var loginInput utils.LoginInput
+        if err := c.ShouldBindJSON(&amp;loginInput); err != nil </span><span class="cov0" title="0">{
+
+                c.JSON(http.StatusBadRequest, basemodels.Response{
+                        Status:  http.StatusBadRequest,
+                        Message: "error",
+                        Data:    map[string]interface{}{"data": err.Error()},
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">status, message, data := utils.Login(loginInput)
+
+        c.JSON(status, basemodels.Response{
+                Status:  status,
+                Message: message,
+                Data:    data,
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package handlers
+
+import (
+        utils "GoTransact/apps/accounts"
+        basemodels "GoTransact/apps/base"
+        "net/http"
+        "time"
+
+        // rdb "github.com/go-redis/redis/v8"
+        "github.com/gin-gonic/gin"
+        "github.com/go-redis/redis"
+        "github.com/sirupsen/logrus"
+)
+
+var (
+        //ctx = context.Background()
+        rdb = redis.NewClient(&amp;redis.Options{
+                Addr: "localhost:6379", // Redis server address
+        })
+)
+
+// LogoutHandler handles user logout
+// @Summary Log out a user
+// @Description Logs out a user by invalidating their token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} basemodels.Response "Logged out successfully"
+// @Failure 401 {object} basemodels.Response "Unauthorized"
+// @Failure 500 {object} basemodels.Response "Internal server error"
+// @Router /logout [post]
+// @Security ApiKeyAuth
+func LogoutHandler(c *gin.Context) <span class="cov0" title="0">{
+
+        utils.InfoLogger.WithFields(logrus.Fields{
+                "method": c.Request.Method,
+                "url":    c.Request.URL.String(),
+        }).Info("Attempted to logout")
+
+        authHeader := c.GetHeader("Authorization")
+        if authHeader == "" </span><span class="cov0" title="0">{
+                c.JSON(http.StatusUnauthorized, basemodels.Response{
+                        Status:  http.StatusUnauthorized,
+                        Message: "authorization header missing",
+                })
+                return
+        }</span>
+
+        //tokenStr := authHeader[len("Bearer "):]
+        <span class="cov0" title="0">_, err := utils.VerifyToken(authHeader)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusUnauthorized, basemodels.Response{
+                        Status:  http.StatusUnauthorized,
+                        Message: "invalid token",
+                        Data: map[string]interface{}{
+                                "data": err.Error(),
+                        },
+                })
+                return
+        }</span>
+
+        // Blacklist the token by storing it in Redis with an expiration time
+        <span class="cov0" title="0">err = rdb.Set(authHeader, "Blacklisted", 24*time.Hour).Err() // adjust expiration time as needed
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, basemodels.Response{
+                        Status:  http.StatusInternalServerError,
+                        Message: "failed to blacklist token",
+                        Data: map[string]interface{}{
+                                "data": err.Error(),
+                        },
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">utils.InfoLogger.WithFields(logrus.Fields{
+                // "method": c.Request.Method,
+                // "url":    c.Request.URL.String(),
+        }).Info("Logged out successfully")
+        c.JSON(http.StatusOK, basemodels.Response{
+                Status:  http.StatusOK,
+                Message: "logged out successfully",
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package handlers
+
+import (
+        "net/http"
+
+        // "GoTransact/apps/accounts/models"
+
+        utils "GoTransact/apps/accounts"
+        basemodels "GoTransact/apps/base"
+
+        "github.com/gin-gonic/gin"
+        "github.com/sirupsen/logrus"
+)
+
+// @BasePath /api
+// Signup_handler handles user registration
+// @Summary Register a new user
+// @Description Register a new user with email, password, etc.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param                         registerInput body            utils.RegisterInput true "User Registration Input"
+// @Success 200 {object} basemodels.Response "Successfully registered"
+// @Failure 400 {object} basemodels.Response "Invalid input"
+// @Failure 500 {object} basemodels.Response "Internal server error"
+// @Router /register [post]
+func Signup_handler(c *gin.Context) <span class="cov0" title="0">{
+
+        utils.InfoLogger.WithFields(logrus.Fields{
+                "method": c.Request.Method,
+                "url":    c.Request.URL.String(),
+        }).Info("Register Request received")
+        //
+        var registerInput utils.RegisterInput
+        if err := c.ShouldBindJSON(&amp;registerInput); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, basemodels.Response{
+                        Status:  http.StatusBadRequest,
+                        Message: "error",
+                        Data:    map[string]interface{}{"data": err.Error()},
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">statusCode, message, data := utils.Signup(registerInput)
+
+        c.JSON(statusCode, basemodels.Response{
+                Status:  statusCode,
+                Message: message,
+                Data:    data,
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package utils
+
+import (
+        "os"
+
+        "github.com/sirupsen/logrus"
+)
+
+var (
+        InfoLogger  *logrus.Logger
+        ErrorLogger *logrus.Logger
+)
+
+func AccountLogInit() <span class="cov8" title="1">{
+        // Create the info logger
+        InfoLogger = logrus.New()
+        infoFile, err := os.OpenFile("./apps/accounts/logs/infolog.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err == nil </span><span class="cov0" title="0">{
+                InfoLogger.Out = infoFile
+        }</span> else<span class="cov8" title="1"> {
+                InfoLogger.Info("Failed to log to file, using default stderr" + err.Error())
+        }</span>
+
+        // Create the error logger
+        <span class="cov8" title="1">ErrorLogger = logrus.New()
+        errorFile, err := os.OpenFile("./apps/accounts/logs/errorlog.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err == nil </span><span class="cov0" title="0">{
+                ErrorLogger.Out = errorFile
+        }</span> else<span class="cov8" title="1"> {
+                ErrorLogger.Error("Failed to log to file, using default stderr" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">InfoLogger.SetFormatter(&amp;logrus.JSONFormatter{
+                PrettyPrint: true,
+        })
+        ErrorLogger.SetFormatter(&amp;logrus.JSONFormatter{
+                PrettyPrint: true,
+        })
+
+        InfoLogger.SetReportCaller(true)
+        ErrorLogger.SetReportCaller(true)
+
+        // Set log level
+        InfoLogger.SetLevel(logrus.InfoLevel)
+        ErrorLogger.SetLevel(logrus.ErrorLevel)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package accounts
+
+import (
+        "GoTransact/apps/accounts/models"
+        //transactionmodel "GoTransact/apps/transaction/models"
+        "GoTransact/pkg/db"
+
+        "fmt"
+)
+
+func SetupTestDb() <span class="cov8" title="1">{
+        fmt.Println("----------------in setup test db----------")
+        db.InitDB("test")
+        if err := db.DB.AutoMigrate(&amp;models.User{}, &amp;models.Company{}); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error autoigrating models : %s", err.Error())
+        }</span>
+}
+
+func CloseTestDb() <span class="cov8" title="1">{
+        fmt.Println("---------------in close db-------------")
+        sqlDB, err := db.DB.DB()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error getting sqlDB from gorm DB: %s", err.Error())
+                return
+        }</span>
+        <span class="cov8" title="1">if err := sqlDB.Close(); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error closing database: %s", err.Error())
+        }</span>
+}
+
+func ClearDatabase() <span class="cov8" title="1">{
+        fmt.Println("----------------in clear db-----------------")
+
+        db.DB.Exec("DELETE FROM companies")
+
+        db.DB.Exec("DELETE FROM users")
+
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package utils
+
+import (
+        // utils "GoTransact/apps/accounts"
+        accountModels "GoTransact/apps/accounts/models"
+        "GoTransact/pkg/db"
+        
+        "context"
+        "crypto/tls"
+        "fmt"
+        "net/http"
+        "regexp"
+        "time"
+
+        "aidanwoods.dev/go-paseto"
+        "github.com/go-playground/validator"
+        "github.com/go-redis/redis/v8"
+        "github.com/sirupsen/logrus"
+        "golang.org/x/crypto/bcrypt"
+        gomail "gopkg.in/mail.v2"
+)
+
+func HashPassword(password string) (string, error) <span class="cov8" title="1">{
+        bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+        return string(bytes), err
+}</span>
+
+func SendMail(to string) <span class="cov8" title="1">{
+
+        InfoLogger.WithFields(logrus.Fields{}).Info("Attempted to send mail on registrtion to ", to)
+
+        fmt.Println("start of mail")
+        m := gomail.NewMessage()
+
+        // Set E-Mail sender
+        m.SetHeader("From", "sourabhtrellis@gmail.com")
+
+        // Set E-Mail receivers
+        m.SetHeader("To", to)
+
+        // Set E-Mail subject
+        m.SetHeader("Subject", "Registration successfull")
+
+        // Set E-Mail body. You can set plain text or html with text/html
+        m.SetBody("text/plain", "YOU HAVE REGISTERED SUCCESSFULLY ON GOTRANSACT")
+
+        // Settings for SMTP server
+        d := gomail.NewDialer("smtp.gmail.com", 587, "sourabhtrellis@gmail.com", "nmvx vzro ehqo xwpd")
+
+        // This is only needed when SSL/TLS certificate is not valid on server.
+        // In production this should be set to false.
+        d.TLSConfig = &amp;tls.Config{InsecureSkipVerify: true}
+
+        // Now send E-Mail
+        if err := d.DialAndSend(m); err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("Error while sending mail")
+                panic(err)</span>
+        }
+        <span class="cov0" title="0">InfoLogger.WithFields(logrus.Fields{}).Info("Registration mail sent to ", to)</span>
+}
+
+type RegisterInput struct {
+        FirstName   string `json:"firstName" binding:"required"`
+        LastName    string `json:"lastName" binding:"required"`
+        Email       string `json:"email" binding:"required,email"`
+        Companyname string `json:"companyName" binding:"required"`
+        Password    string `json:"password" binding:"required,min=8" validate:"password_complexity"`
+}
+
+type LoginInput struct {
+        Email    string `json:"email" binding:"required,email"`
+        Password string `json:"password" binding:"required,min=8" validate:"password_complexity"`
+}
+
+var (
+        secretKey = paseto.NewV4AsymmetricSecretKey() // don't share this!!!
+        publicKey = secretKey.Public()                // DO share this one
+        ctx       = context.Background()
+        rdb       = redis.NewClient(&amp;redis.Options{
+                Addr: "localhost:6379", // Redis server address
+        })
+)
+
+func CreateToken(user accountModels.User) (string, error) <span class="cov8" title="1">{
+
+        token := paseto.NewToken()
+
+        token.SetIssuedAt(time.Now())
+        token.SetNotBefore(time.Now())
+        token.SetExpiration(time.Now().Add(2 * time.Hour))
+
+        token.Set("user", user)
+
+        signedToken := token.V4Sign(secretKey, nil)
+
+        return signedToken, nil
+}</span>
+
+func VerifyToken(signedToken string) (any, error) <span class="cov0" title="0">{
+
+        val, err := rdb.Get(ctx, signedToken).Result()
+        if err == nil &amp;&amp; val == "Blacklisted" </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("token has been revoked")
+        }</span>
+
+        <span class="cov0" title="0">parser := paseto.NewParser()
+        parser.AddRule(paseto.NotExpired())
+
+        verifiedtoken, err := parser.ParseV4Public(publicKey, signedToken, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov0" title="0">var User accountModels.User
+        if err := verifiedtoken.Get("user", &amp;User); err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov0" title="0">return User, nil</span>
+}
+
+// ValidatePassword checks if the password meets the complexity requirements
+func ValidatePassword(fl validator.FieldLevel) bool <span class="cov8" title="1">{
+        Password := fl.Field().String()
+
+        var (
+                hasMinLen    = len(Password) &gt;= 8
+                hasUpperCase = regexp.MustCompile(`[A-Z]`).MatchString(Password)
+                hasLowerCase = regexp.MustCompile(`[a-z]`).MatchString(Password)
+                hasNumber    = regexp.MustCompile(`[0-9]`).MatchString(Password)
+                hasSpecial   = regexp.MustCompile(`[!@#~$%^&amp;*(),.?":{}|&lt;&gt;]`).MatchString(Password)
+        )
+
+        return hasMinLen &amp;&amp; hasUpperCase &amp;&amp; hasLowerCase &amp;&amp; hasNumber &amp;&amp; hasSpecial
+}</span>
+
+var validate *validator.Validate
+
+// Init initializes the custom validator
+func InitValidation() <span class="cov8" title="1">{
+        validate = validator.New()
+        validate.RegisterValidation("password_complexity", ValidatePassword)
+}</span>
+
+// GetValidator returns the validator instance
+func GetValidator() *validator.Validate <span class="cov8" title="1">{
+        return validate
+}</span>
+
+func Login(loginuser LoginInput) (int, string, map[string]interface{}) <span class="cov8" title="1">{
+
+        InfoLogger.WithFields(logrus.Fields{}).Info("Attempted to login with ", loginuser.Email)
+
+        // custom validator for additional password validation
+        if err := GetValidator().Struct(loginuser); err != nil </span><span class="cov0" title="0">{
+
+                return http.StatusBadRequest, "Password should contain atleast one upper case character,one lower case character,one number and one special character", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">var user accountModels.User
+        if err := db.DB.Where("email = ?", loginuser.Email).First(&amp;user).Error; err != nil </span><span class="cov8" title="1">{
+                ErrorLogger.WithFields(logrus.Fields{}).Error("Failed to login with ", loginuser.Email)
+                return http.StatusUnauthorized, "invalid username or password", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginuser.Password)); err != nil </span><span class="cov8" title="1">{
+                ErrorLogger.WithFields(logrus.Fields{}).Error("Failed to login with ", loginuser.Email)
+                return http.StatusUnauthorized, "invalid username or password", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">token, err := CreateToken(user)
+        if err != nil </span><span class="cov0" title="0">{
+
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("error creating token")
+
+                return http.StatusInternalServerError, "error creating token", map[string]interface{}{"data": err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("User logged in with ", loginuser.Email, " and id ", user.Internal_id)
+
+        return http.StatusOK, "Logged in successfull", map[string]interface{}{"token": token}</span>
+}
+
+func Signup(user RegisterInput) (int, string, map[string]interface{}) <span class="cov8" title="1">{
+
+        InfoLogger.WithFields(logrus.Fields{}).Info("Attempted to register with ", user.Email, " and company ", user.Companyname)
+
+        if err := GetValidator().Struct(user); err != nil </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "Password should contain atleast one upper case character,one lower case character,one number and one special character", map[string]interface{}{}
+        }</span>
+
+        //chaecking if user with email already exist
+        <span class="cov8" title="1">var count int64
+
+        // Check if user with the email already exists
+        if err := db.DB.Model(&amp;accountModels.User{}).Where("email = ?", user.Email).Count(&amp;count).Error; err != nil </span><span class="cov0" title="0">{
+                return http.StatusInternalServerError, "Database error", map[string]interface{}{}
+        }</span>
+        <span class="cov8" title="1">if count &gt; 0 </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "email already exists", map[string]interface{}{}
+        }</span>
+
+        // Check if company with the name already exists
+        <span class="cov8" title="1">if err := db.DB.Model(&amp;accountModels.Company{}).Where("name = ?", user.Companyname).Count(&amp;count).Error; err != nil </span><span class="cov0" title="0">{
+                return http.StatusInternalServerError, "Database error", map[string]interface{}{}
+        }</span>
+        <span class="cov8" title="1">if count &gt; 0 </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "company already exists", map[string]interface{}{}
+        }</span>
+
+        //hashing the password to store in database
+        <span class="cov8" title="1">hashedPassword, err := HashPassword(user.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return http.StatusInternalServerError, "Error while hashing password", map[string]interface{}{}
+        }</span>
+
+        //creating user and company model
+        <span class="cov8" title="1">newuser := accountModels.User{
+                FirstName: user.FirstName,
+                LastName:  user.LastName,
+                Email:     user.Email,
+                Password:  hashedPassword,
+                Company: accountModels.Company{
+                        Name: user.Companyname,
+                },
+        }
+
+        //save the user
+        if err := db.DB.Create(&amp;newuser).Error; err != nil </span><span class="cov0" title="0">{
+                //log
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("Error creating user in database")
+
+                return http.StatusInternalServerError, "error creating user", map[string]interface{}{}
+        }</span>
+        //log
+        <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("User created in database ", user.Email, " and company ", user.Companyname)
+
+        go SendMail(user.Email)
+
+        return http.StatusOK, "User created successfully", map[string]interface{}{}</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package handlers
+
+import (
+        basemodels "GoTransact/apps/base"
+        utils "GoTransact/apps/transaction"
+
+        "fmt"
+        "html/template"
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+        "github.com/sirupsen/logrus"
+)
+
+// @BasePath /api
+// ConfirmPayment godoc
+// @Summary Confirm a payment
+// @Description Confirm payment by transaction ID and status
+// @Tags Transactions
+// @Accept json
+// @Produce json
+// @Param transaction_id query string true "Transaction ID"
+// @Param status query string true "Status"
+// @Success 200 {object} basemodels.Response
+// @Failure 400 {object} basemodels.Response
+// @Failure 500 {object} basemodels.Response
+// @Router /confirm-payment [get]
+func ConfirmPayment(c *gin.Context) <span class="cov0" title="0">{
+
+        utils.InfoLogger.WithFields(logrus.Fields{
+                "method": c.Request.Method,
+                "url":    c.Request.URL.String(),
+        }).Info("confirm payment Request received")
+
+        transactionIdStr := c.Query("transaction_id")
+        statusStr := c.Query("status")
+
+        _, message, data := utils.ConfirmPayment(transactionIdStr, statusStr)
+
+        // Convert data to map to extract transaction details
+
+        // Create a map for template data
+        tmplData := map[string]interface{}{
+                "TransactionID": transactionIdStr,
+                "Amount":        data["Amount"],
+                "Message":       message,
+        }
+        fmt.Println("---------------", message, "---------------")
+        // Select the template based on the message
+        var tmpl *template.Template
+        var err error
+
+        if message == "Transaction successful" </span><span class="cov0" title="0">{
+                tmpl, err = template.ParseFiles("/home/trellis/Sourabh/GoTransact/Backend/apps/transaction/templates/payment_success.html")
+        }</span> else<span class="cov0" title="0"> if message == "Transaction Canceled" </span><span class="cov0" title="0">{
+                tmpl, err = template.ParseFiles("/home/trellis/Sourabh/GoTransact/Backend/apps/transaction/templates/payment_fail.html")
+        }</span> else<span class="cov0" title="0"> {
+                c.JSON(http.StatusInternalServerError, basemodels.Response{
+                        Status:  http.StatusInternalServerError,
+                        Message: "Unknown transaction status",
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, basemodels.Response{
+                        Status:  http.StatusInternalServerError,
+                        Message: "Template parsing error",
+                })
+                return
+        }</span>
+
+        // Render the template
+        <span class="cov0" title="0">c.Writer.Header().Set("Content-Type", "text/html")
+        tmpl.Execute(c.Writer, tmplData)</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package handlers
+
+import (
+        accountmodels "GoTransact/apps/accounts/models"
+        basemodels "GoTransact/apps/base"
+        utils "GoTransact/apps/transaction"
+
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+        "github.com/sirupsen/logrus"
+)
+
+// PaymentRequest handles the payment request
+// @Summary Create a new payment request
+// @Description Create a new payment request with the provided details
+// @Tags Transactions
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Authorization header with bearer token"
+// @Param paymentInput body utils.PostPaymentInput true "Payment Request Input"
+// @Success 200 {object} basemodels.Response "Successfully created payment request"
+// @Failure 400 {object} basemodels.Response "Invalid input"
+// @Failure 500 {object} basemodels.Response "Internal server error"
+// @Security ApiKeyAuth
+// @Router /protected/post-payment [post]
+func PaymentRequest(c *gin.Context) <span class="cov0" title="0">{
+
+        utils.InfoLogger.WithFields(logrus.Fields{
+                "method": c.Request.Method,
+                "url":    c.Request.URL.String(),
+        }).Info("Post Payment Request received")
+
+        var Postpaymentinput utils.PostPaymentInput
+        if err := c.ShouldBindJSON(&amp;Postpaymentinput); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, basemodels.Response{
+                        Status:  http.StatusBadRequest,
+                        Message: "error",
+                        Data:    map[string]interface{}{"data": err.Error()},
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">UserFromRequest, exist := c.Get("user")
+        if !exist </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, basemodels.Response{
+                        Status:  http.StatusBadRequest,
+                        Message: "User not found in token",
+                        Data:    map[string]interface{}{},
+                })
+                return
+        }</span>
+
+        <span class="cov0" title="0">user, ok := UserFromRequest.(accountmodels.User)
+        if !ok </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user type"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">status, message, data := utils.PostPayment(Postpaymentinput, user)
+
+        c.JSON(status, basemodels.Response{
+                Status:  status,
+                Message: message,
+                Data:    data,
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package utils
+
+import (
+        "os"
+
+        "github.com/sirupsen/logrus"
+)
+
+var (
+        InfoLogger  *logrus.Logger
+        ErrorLogger *logrus.Logger
+)
+
+func TransactionLogInit() <span class="cov8" title="1">{
+        // Create the info logger
+        InfoLogger = logrus.New()
+        infoFile, err := os.OpenFile("./apps/transaction/logs/infolog.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err == nil </span><span class="cov0" title="0">{
+                InfoLogger.Out = infoFile
+        }</span> else<span class="cov8" title="1"> {
+                InfoLogger.Info("Failed to log to file, using default stderr")
+        }</span>
+
+        // Create the error logger
+        <span class="cov8" title="1">ErrorLogger = logrus.New()
+        errorFile, err := os.OpenFile("./apps/transaction/logs/errorlog.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err == nil </span><span class="cov0" title="0">{
+                ErrorLogger.Out = errorFile
+        }</span> else<span class="cov8" title="1"> {
+                ErrorLogger.Error("Failed to log to file, using default stderr")
+        }</span>
+
+        <span class="cov8" title="1">InfoLogger.SetFormatter(&amp;logrus.JSONFormatter{
+                PrettyPrint: true,
+        })
+        ErrorLogger.SetFormatter(&amp;logrus.JSONFormatter{
+                PrettyPrint: true,
+        })
+
+        InfoLogger.SetReportCaller(true)
+        ErrorLogger.SetReportCaller(true)
+
+        // Set log level
+        InfoLogger.SetLevel(logrus.InfoLevel)
+        ErrorLogger.SetLevel(logrus.ErrorLevel)</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package test
+
+import (
+        "GoTransact/apps/accounts/models"
+        transactionmodel "GoTransact/apps/transaction/models"
+        "GoTransact/pkg/db"
+
+        "fmt"
+)
+
+func SetupTestDb() <span class="cov8" title="1">{
+        fmt.Println("----------------in setup test db----------")
+        db.InitDB("test")
+        if err := db.DB.AutoMigrate(&amp;models.User{}, &amp;models.Company{}, &amp;transactionmodel.Payment_Gateway{}, &amp;transactionmodel.TransactionRequest{}, &amp;transactionmodel.TransactionHistory{}); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error automigrating models : %s", err.Error())
+        }</span>
+}
+
+func CloseTestDb() <span class="cov8" title="1">{
+        fmt.Println("---------------in close db-------------")
+        sqlDB, err := db.DB.DB()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error getting sqlDB from gorm DB: %s", err.Error())
+                return
+        }</span>
+        <span class="cov8" title="1">if err := sqlDB.Close(); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error closing database: %s", err.Error())
+        }</span>
+}
+
+func ClearDatabase() <span class="cov8" title="1">{
+        fmt.Println("----------------in clear db-----------------")
+
+        db.DB.Exec("DELETE FROM companies")
+
+        db.DB.Exec("DELETE FROM users")
+
+        db.DB.Exec("DELETE FROM transaction_histories")
+
+        db.DB.Exec("DELETE FROM transaction_requests")
+        db.DB.Exec("DELETE FROM payment_gateways")
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package utils
+
+import (
+        accountmodels "GoTransact/apps/accounts/models"
+        transactionmodels "GoTransact/apps/transaction/models"
+        "GoTransact/pkg/db"
+        "bytes"
+        "crypto/tls"
+        "fmt"
+        "html/template"
+        "net/http"
+        "net/url"
+        "regexp"
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/360EntSecGroup-Skylar/excelize"
+        "github.com/go-playground/validator"
+        "github.com/google/uuid"
+        "github.com/sirupsen/logrus"
+        gomail "gopkg.in/mail.v2"
+)
+
+type PostPaymentInput struct {
+        CardNumber  string `json:"cardnumber" binding:"required" validate:"card_number" `
+        ExpiryDate  string `json:"expirydate" binding:"required" validate:"expiry_date" `
+        Cvv         string `json:"cvv" validate:"cvv" binding:"required"`
+        Amount      string `json:"amount" binding:"required" validate:"amount"`
+        Description string `json:"description" `
+}
+
+type TemplateData struct {
+        Username     string
+        TrasactionID uuid.UUID
+        Amount       float64
+        ConfirmURL   string
+        CancelURL    string
+        DateTime     time.Time
+}
+
+func SendMail(user accountmodels.User, request transactionmodels.TransactionRequest) <span class="cov8" title="1">{
+
+        InfoLogger.WithFields(logrus.Fields{
+                "email": user.Email,
+                "id":    user.Internal_id,
+        }).Info("Attempted to send confirm payment mail")
+
+        fmt.Println("start of mail")
+        m := gomail.NewMessage()
+
+        // Set E-Mail sender
+        m.SetHeader("From", "sourabhtrellis@gmail.com")
+
+        // Set E-Mail receivers
+        // m.SetHeader("To", user.Email)
+        m.SetHeader("To", user.Email)
+
+        // Set E-Mail subject
+        m.SetHeader("Subject", "Payment Confirmation Required")
+
+        // Parse the HTML template
+        tmpl, err := template.ParseFiles("/home/trellis/Sourabh/GoTransact/Backend/apps/transaction/templates/email_template.html")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error parsing email template: %s", err)
+        }</span>
+
+        // Create a buffer to hold the executed template
+        <span class="cov8" title="1">var body bytes.Buffer
+
+        baseURL := "http://localhost:8080/api/confirm-payment" // Replace with your actual domain and endpoint
+        params := url.Values{}
+        params.Add("transaction_id", request.Internal_id.String())
+        params.Add("status", "true")
+        ConfirmActionURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+        baseURL = "http://localhost:8080/api/confirm-payment" // Replace with your actual domain and endpoint
+        params = url.Values{}
+        params.Add("transaction_id", request.Internal_id.String())
+        params.Add("status", "false")
+        CancelActionURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+        // Execute the template with the data
+        TemplateData := TemplateData{
+                Username:     user.FirstName,
+                TrasactionID: request.Internal_id,
+                Amount:       request.Amount,
+                ConfirmURL:   ConfirmActionURL,
+                CancelURL:    CancelActionURL,
+        }
+        fmt.Println(TemplateData)
+        if err := tmpl.Execute(&amp;body, TemplateData); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error executing email template: %s", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println()
+        // Set E-Mail body as HTML
+        m.SetBody("text/html", body.String())
+
+        // Settings for SMTP server
+        d := gomail.NewDialer("smtp.gmail.com", 587, "sourabhtrellis@gmail.com", "nmvx vzro ehqo xwpd")
+
+        // This is only needed when SSL/TLS certificate is not valid on server.
+        // In production this should be set to false.
+        d.TLSConfig = &amp;tls.Config{InsecureSkipVerify: true}
+
+        // Now send E-Mail
+        if err := d.DialAndSend(m); err != nil </span><span class="cov0" title="0">{
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                        "email": user.Email,
+                }).Error("Error sending confirm payment mail")
+                panic(err)</span>
+        }
+        <span class="cov0" title="0">InfoLogger.WithFields(logrus.Fields{
+                "email": user.Email,
+                "id":    user.Internal_id,
+        }).Info("comfirmation mail sent")</span>
+}
+
+func FetchTransactionsLast24Hours() []transactionmodels.TransactionRequest <span class="cov0" title="0">{
+        var transactions []transactionmodels.TransactionRequest
+        last24Hours := time.Now().Add(-24 * time.Hour)
+        db.DB.Where("created_at &gt;= ?", last24Hours).Find(&amp;transactions)
+        return transactions
+}</span>
+
+func GenerateExcel(transactions []transactionmodels.TransactionRequest) (string, error) <span class="cov0" title="0">{
+        f := excelize.NewFile()
+        sheetName := "Transactions"
+        index := f.NewSheet(sheetName)
+
+        // f.SetCellValue(sheetName, "A1", "ID")
+        f.SetCellValue(sheetName, "B1", "Transaction ID")
+        // f.SetCellValue(sheetName, "C1", "UserID")
+        f.SetCellValue(sheetName, "D1", "Status")
+        // f.SetCellValue(sheetName, "E1", "PaymentGatewayID")
+        f.SetCellValue(sheetName, "F1", "Description")
+        f.SetCellValue(sheetName, "G1", "Transaction Amount")
+        f.SetCellValue(sheetName, "H1", "Transaction date")
+        // f.SetCellValue(sheetName, "I1", "UpdatedAt")
+
+        for i, tr := range transactions </span><span class="cov0" title="0">{
+                row := i + 2
+                // f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), tr.ID)
+                f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), tr.Internal_id)
+                // f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), tr.UserID)
+                f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), tr.Status)
+                // f.SetCellValue(sheetName, fmt.Sprintf("E%d", row), tr.Payment_Gateway_id)
+                f.SetCellValue(sheetName, fmt.Sprintf("F%d", row), tr.Description)
+                f.SetCellValue(sheetName, fmt.Sprintf("G%d", row), tr.Amount)
+                f.SetCellValue(sheetName, fmt.Sprintf("H%d", row), tr.CreatedAt)
+                // f.SetCellValue(sheetName, fmt.Sprintf("I%d", row), tr.UpdatedAt)
+        }</span>
+
+        <span class="cov0" title="0">f.SetActiveSheet(index)
+        filePath := "transactions.xlsx"
+        if err := f.SaveAs(filePath); err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return filePath, nil</span>
+}
+
+func SendMailWithAttachment(email, filePath string) <span class="cov0" title="0">{
+
+        m := gomail.NewMessage()
+        m.SetHeader("From", "sourabhtrellis@gmail.com")
+        m.SetHeader("To", email)
+        m.SetHeader("Subject", "Daily Transactions Report")
+        m.SetBody("text/plain", "Please find attached the daily transactions report.")
+        m.Attach(filePath)
+
+        d := gomail.NewDialer("smtp.gmail.com", 587, "sourabhtrellis@gmail.com", "nmvx vzro ehqo xwpd")
+
+        d.TLSConfig = &amp;tls.Config{InsecureSkipVerify: true}
+
+        if err := d.DialAndSend(m); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("could not send email: %v", err)
+        }</span>
+        <span class="cov0" title="0">fmt.Println("Email sent successfully")</span>
+}
+
+var validate *validator.Validate
+
+func cardNumberValidator(fl validator.FieldLevel) bool <span class="cov8" title="1">{
+        fmt.Println("-------in card validator--------")
+        cardNumber := fl.Field().String()
+        // Check if card number is 16 or 18 digits
+        match, _ := regexp.MatchString(`^\d{16}|\d{18}$`, cardNumber)
+        fmt.Println(match)
+        return match
+}</span>
+
+func expiryDateValidator(fl validator.FieldLevel) bool <span class="cov8" title="1">{
+        expiryDate := fl.Field().String()
+        // Check if expiry date is in the format MM/YY and within 10 years span
+        t, err := time.Parse("01/06", expiryDate)
+        if err != nil </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov8" title="1">currentYear := time.Now().Year() % 100
+        expiryYear := t.Year() % 100
+        return expiryYear &gt;= currentYear</span>
+}
+
+func cvvValidator(fl validator.FieldLevel) bool <span class="cov8" title="1">{
+        cvv := fl.Field().String()
+        // Check if CVV is exactly 3 digits
+        match, _ := regexp.MatchString(`^\d{3}$`, cvv)
+        return match
+}</span>
+
+func amountValidation(fl validator.FieldLevel) bool <span class="cov8" title="1">{
+        amount := fl.Field().String()
+        value, err := strconv.ParseFloat(amount, 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">return value &gt; 0</span>
+}
+
+// CustomErrorMessages contains custom error messages for validation
+var CustomErrorMessages = map[string]string{
+        "card_number": "Card number must be 16 or 18 digits.",
+        "expiry_date": "Expiry date must be in MM/YY format and within a 10 year span.",
+        "cvv":         "CVV must be exactly 3 digits.",
+        "amount":      "Amount must be greater than 0.",
+}
+
+// InitValidation initializes the custom validators
+
+func InitValidation() <span class="cov8" title="1">{
+        validate = validator.New()
+        validate.RegisterValidation("card_number", cardNumberValidator)
+        validate.RegisterValidation("expiry_date", expiryDateValidator)
+        validate.RegisterValidation("cvv", cvvValidator)
+        validate.RegisterValidation("amount", amountValidation)
+}</span>
+func GetValidator() *validator.Validate <span class="cov8" title="1">{
+        return validate
+}</span>
+
+func PostPayment(Postpaymentinput PostPaymentInput, user accountmodels.User) (int, string, map[string]interface{}) <span class="cov8" title="1">{
+
+        InfoLogger.WithFields(logrus.Fields{}).Info("Attempted to create transaction request with email ", user.Email, " id ", user.Internal_id)
+
+        if err := GetValidator().Struct(Postpaymentinput); err != nil </span><span class="cov8" title="1">{
+                validationErrors := err.(validator.ValidationErrors)
+                errors := make(map[string]string)
+                for _, fieldErr := range validationErrors </span><span class="cov8" title="1">{
+                        fieldName := fieldErr.Field()
+                        tag := fieldErr.Tag()
+                        errors[fieldName] = CustomErrorMessages[tag]
+                }</span>
+                <span class="cov8" title="1">return http.StatusBadRequest, "error while validating", map[string]interface{}{}</span>
+        }
+
+        <span class="cov8" title="1">floatAmount, _ := strconv.ParseFloat(Postpaymentinput.Amount, 64)
+
+        var gateway transactionmodels.Payment_Gateway
+        if err := db.DB.Where("slug = ?", "card").First(&amp;gateway).Error; err != nil </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "invalid payment type", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">TransactionRequest := transactionmodels.TransactionRequest{
+                UserID:             user.ID,
+                Status:             transactionmodels.StatusProcessing,
+                Description:        Postpaymentinput.Description,
+                Amount:             floatAmount,
+                Payment_Gateway_id: gateway.ID,
+        }
+
+        if err := db.DB.Create(&amp;TransactionRequest).Error; err != nil </span><span class="cov0" title="0">{
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("Error creating record in transaction request transaction-id=", TransactionRequest.Internal_id)
+                return http.StatusInternalServerError, "internal server error", map[string]interface{}{}
+        }</span>
+        <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("created record in transaction request with email ", user.Email, " id ", user.Internal_id)
+
+        TransactionHistory := transactionmodels.TransactionHistory{
+                TransactionID: TransactionRequest.ID,
+                Status:        TransactionRequest.Status,
+                Description:   TransactionRequest.Description,
+                Amount:        TransactionRequest.Amount,
+        }
+
+        if err := db.DB.Create(&amp;TransactionHistory).Error; err != nil </span><span class="cov0" title="0">{
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("Error creating record in transaction history")
+                return http.StatusInternalServerError, "internal server error", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("Created record in transaction history with email ", user.Email, " id ", user.Internal_id)
+
+        go SendMail(user, TransactionRequest)
+
+        return http.StatusOK, "success", map[string]interface{}{"transaction ID": TransactionRequest.Internal_id}</span>
+}
+
+func ConfirmPayment(transactionIdStr, statusStr string) (int, string, map[string]interface{}) <span class="cov8" title="1">{
+        // Convert the string ID to a uuid.UUID
+        InfoLogger.WithFields(logrus.Fields{
+                // "email": user.Email,
+                // "id":    user.Internal_id,
+        }).Info("Attempted to confirm/cancel payment transaction-id=", transactionIdStr)
+        transactionId, err := uuid.Parse(transactionIdStr)
+        fmt.Println("parsed", transactionId)
+        if err != nil </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "Invalid transaction ID", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">var transactionRequest transactionmodels.TransactionRequest
+        if err := db.DB.Where("internal_id = ?", transactionId).First(&amp;transactionRequest).Error; err != nil </span><span class="cov8" title="1">{
+                return http.StatusBadRequest, "transaction request not found", map[string]interface{}{}
+        }</span>
+
+        <span class="cov8" title="1">var trasactionHistory transactionmodels.TransactionHistory
+        trasactionHistory.TransactionID = transactionRequest.ID
+        trasactionHistory.Description = transactionRequest.Description
+        trasactionHistory.Amount = transactionRequest.Amount
+
+        if strings.EqualFold(statusStr, "true") </span><span class="cov8" title="1">{
+
+                if err := db.DB.Model(&amp;transactionRequest).Where("id = ?", transactionRequest.ID).Update("status", transactionmodels.StatusSuccess).Error; err != nil </span><span class="cov0" title="0">{
+                        ErrorLogger.WithFields(logrus.Fields{
+                                "error": err.Error(),
+                        }).Error("Error completing payment transaction-id=", transactionRequest.Internal_id)
+                        return http.StatusInternalServerError, "Failed to confirm the payment", map[string]interface{}{}
+                }</span>
+                <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("Payment completed transaction-id=", transactionRequest.Internal_id)
+                </span><span class="cov8" title="1">{
+                        trasactionHistory.Status = transactionmodels.StatusSuccess
+                }</span>
+        } else<span class="cov8" title="1"> {
+
+                if err := db.DB.Model(&amp;transactionRequest).Where("id = ?", transactionRequest.ID).Update("status", transactionmodels.StatusFailed).Error; err != nil </span><span class="cov0" title="0">{
+                        ErrorLogger.WithFields(logrus.Fields{
+                                "error": err.Error(),
+                        }).Error("Error canceling the payment transaction-id=", transactionRequest.Internal_id)
+                        return http.StatusInternalServerError, "Failed to confirm the payment", map[string]interface{}{}
+                }</span>
+                <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("Payment canceled transaction-id=", transactionRequest.Internal_id)
+                </span><span class="cov8" title="1">{
+                        trasactionHistory.Status = transactionmodels.StatusFailed
+                }</span>
+
+        }
+
+        <span class="cov8" title="1">if err := db.DB.Create(&amp;trasactionHistory).Error; err != nil </span><span class="cov0" title="0">{
+                ErrorLogger.WithFields(logrus.Fields{
+                        "error": err.Error(),
+                }).Error("failed to update transaction history to confirm/cancel transaction-id=", transactionRequest.Internal_id)
+                return http.StatusInternalServerError, "Failed to update transaction history", map[string]interface{}{}
+        }</span>
+        <span class="cov8" title="1">InfoLogger.WithFields(logrus.Fields{}).Info("transaction history updated to confirm/cancel transaction-id=", transactionRequest.Internal_id)
+        if strings.EqualFold(statusStr, "true") </span><span class="cov8" title="1">{
+                return http.StatusOK, "Transaction successful", map[string]interface{}{"Amount": transactionRequest.Amount}
+        }</span> else<span class="cov8" title="1"> {
+                return http.StatusOK, "Transaction Canceled", map[string]interface{}{"Amount": transactionRequest.Amount}
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package config
+
+import (
+        "fmt"
+        "log"
+        "os"
+
+        "github.com/joho/godotenv"
+)
+
+var (
+        DbHost     string
+        DbPort     string
+        DbUser     string
+        DbPassword string
+        DbName     string
+        DbTimezone string
+)
+
+func LoadEnv() <span class="cov8" title="1">{
+        err := godotenv.Load()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov8" title="1">DbHost = os.Getenv("DB_HOST")
+        fmt.Println("DbHost=================",DbHost)
+        DbPort = os.Getenv("DB_PORT")
+        DbUser = os.Getenv("DB_USER")
+        DbPassword = os.Getenv("DB_PASSWORD")
+        DbName = os.Getenv("DB_NAME")
+        DbTimezone = os.Getenv("DB_TIMEZONE")</span>
+}
+
+// err := godotenv.Load()
+//         if err != nil {
+//                 log.Fatal(err)
+//         }
+
+//         dbHost := os.Getenv("DB_HOST")
+//         dbPort := os.Getenv("DB_PORT")
+//         dbUser := os.Getenv("DB_USER")
+//         dbPassword := os.Getenv("DB_PASSWORD")
+//         dbName := os.Getenv("DB_NAME")
+//         dbTimezone := os.Getenv("DB_TIMEZONE")
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">// Package docs Code generated by swaggo/swag. DO NOT EDIT
+package docs
+
+import "github.com/swaggo/swag"
+
+const docTemplate = `{
+    "schemes": {{ marshal .Schemes }},
+    "swagger": "2.0",
+    "info": {
+        "description": "{{escape .Description}}",
+        "title": "{{.Title}}",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "{{.Version}}"
+    },
+    "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
+    "paths": {
+        "/confirm-payment": {
+            "get": {
+                "description": "Confirm payment by transaction ID and status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Confirm a payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transaction ID",
+                        "name": "transaction_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "User login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Login input",
+                        "name": "loginInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.LoginInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Logs out a user by invalidating their token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log out a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/protected/post-payment": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new payment request with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create a new payment request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization header with bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment Request Input",
+                        "name": "paymentInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.PostPaymentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully created payment request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "Register a new user with email, password, etc.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User Registration Input",
+                        "name": "registerInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.RegisterInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Response": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messsage": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "utils.PostPaymentInput": {
+            "type": "object",
+            "required": [
+                "amount",
+                "cardnumber",
+                "cvv",
+                "expirydate"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "cardnumber": {
+                    "type": "string"
+                },
+                "cvv": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "expirydate": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.RegisterInput": {
+            "type": "object",
+            "required": [
+                "companyName",
+                "email",
+                "firstName",
+                "lastName",
+                "password"
+            ],
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        }
+    }
+}`
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = &amp;swag.Spec{
+        Version:          "1.0",
+        Host:             "localhost:8081",
+        BasePath:         "/api",
+        Schemes:          []string{},
+        Title:            "GoTransact",
+        Description:      "This is a sample server for a project.",
+        InfoInstanceName: "swagger",
+        SwaggerTemplate:  docTemplate,
+        LeftDelim:        "{{",
+        RightDelim:       "}}",
+}
+
+func init() <span class="cov0" title="0">{
+        swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+}</span>
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package main
+
+//go:generate swagger generate spec -o docs/swagger.json
+import (
+        accountModels "GoTransact/apps/accounts/models"
+        transactionModels "GoTransact/apps/transaction/models"
+
+        accountsUtils "GoTransact/apps/accounts"
+        transactionUtils "GoTransact/apps/transaction"
+
+        "GoTransact/config"
+        db "GoTransact/pkg/db"
+        "GoTransact/router"
+        "log"
+
+        // log "GoTransact/pkg/log"
+
+        _ "GoTransact/docs"
+
+        "github.com/robfig/cron"
+        swaggerFiles "github.com/swaggo/files"
+        ginSwagger "github.com/swaggo/gin-swagger"
+)
+
+// @BasePath /api
+// @title GoTransact
+// @version 1.0
+// @description This is a sample server for a project.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8081
+
+func main() <span class="cov0" title="0">{
+        config.LoadEnv()
+        db.InitDB("prod")
+        accountsUtils.InitValidation()
+        transactionUtils.InitValidation()
+        accountsUtils.AccountLogInit()
+        transactionUtils.TransactionLogInit()
+
+        
+        db.DB.AutoMigrate(&amp;accountModels.User{}, &amp;accountModels.Company{}, &amp;transactionModels.Payment_Gateway{}, &amp;transactionModels.TransactionRequest{}, &amp;transactionModels.TransactionHistory{})
+
+        c := cron.New()
+        c.AddFunc("@every 24h", func() </span><span class="cov0" title="0">{
+                transactions := transactionUtils.FetchTransactionsLast24Hours()
+                filePath, err := transactionUtils.GenerateExcel(transactions)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("failed to generate excel: %v", err)
+                }</span>
+                <span class="cov0" title="0">transactionUtils.SendMailWithAttachment("sourabhsd87@gmail.com", filePath)</span>
+        })
+        <span class="cov0" title="0">c.Start()
+
+        r := router.Router2()
+
+        r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+        r.Run(":8081")</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package middlewares
+
+import (
+        "GoTransact/apps/accounts"
+        models "GoTransact/apps/base"
+        "fmt"
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+)
+
+func AuthMiddleware() gin.HandlerFunc <span class="cov0" title="0">{
+        return func(c *gin.Context) </span><span class="cov0" title="0">{
+                token := c.GetHeader("Authorization")
+
+                if token == "" </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusUnauthorized, models.Response{
+                                Status:  http.StatusUnauthorized,
+                                Message: "error",
+                                Data:    map[string]interface{}{"data": "unauthorized request"},
+                        })
+                        c.Abort()
+                        return
+
+                }</span>
+
+                <span class="cov0" title="0">user, err := utils.VerifyToken(token)
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusUnauthorized, models.Response{
+                                Status:  http.StatusUnauthorized,
+                                Message: "error",
+                                Data:    map[string]interface{}{"data": "unauthorized request"},
+                        })
+                        c.Abort()
+                        return
+
+                }</span>
+                <span class="cov0" title="0">fmt.Println("a======================", c.Keys)
+                c.Set("user", user)
+                fmt.Println("b-------------------", c.Keys)
+                c.Next()</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package db
+
+import (
+        "GoTransact/config"
+        "fmt"
+        "strings"
+
+        "gorm.io/driver/postgres"
+        "gorm.io/gorm"
+)
+
+var DB *gorm.DB
+
+func InitDB(typ string) <span class="cov8" title="1">{
+        var dbURI string
+        if strings.EqualFold(typ, "test") </span><span class="cov8" title="1">{
+                fmt.Println("in test db setup")
+                config.LoadEnv()
+                dbURI = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=%s", config.DbHost, config.DbUser, config.DbPassword, "testgotransact", config.DbPort, config.DbTimezone)
+        }</span> else<span class="cov0" title="0"> {
+                dbURI = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=%s", config.DbHost, config.DbUser, config.DbPassword, config.DbName, config.DbPort, config.DbTimezone)
+        }</span>
+
+        // newLogger := logger.New(
+        //         log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+        //         logger.Config{
+        //                 SlowThreshold:             time.Microsecond, // Slow SQL threshold
+        //                 LogLevel:                  logger.Info,      // Log level
+        //                 IgnoreRecordNotFoundError: true,             // Ignore ErrRecord Not Found error for logger
+        //                 Colorful:                  true,             // Disable color
+        //         },
+        // )
+
+        // db, err := gorm.Open(postgres.Open(dbURI), &amp;gorm.Config{Logger: newLogger})
+        <span class="cov8" title="1">db, err := gorm.Open(postgres.Open(dbURI), &amp;gorm.Config{})
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">DB = db</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package router
+
+import (
+        account "GoTransact/apps/accounts/handlers"
+        transaction "GoTransact/apps/transaction/handlers"
+        docs "GoTransact/docs"
+        "GoTransact/middlewares"
+
+        "github.com/gin-gonic/gin"
+)
+
+func Router2() *gin.Engine <span class="cov0" title="0">{
+
+        r := gin.Default()
+
+        docs.SwaggerInfo.BasePath = "/api"
+
+        api := r.Group("/api")
+        </span><span class="cov0" title="0">{
+                api.POST("/register", account.Signup_handler)
+                api.POST("/login", account.Login_handler)
+                api.GET("/confirm-payment", transaction.ConfirmPayment)
+
+                protected := api.Group("/protected")
+                protected.Use(middlewares.AuthMiddleware())
+                </span><span class="cov0" title="0">{
+                        protected.POST("/post-payment", transaction.PaymentRequest)
+                        protected.POST("/logout", account.LogoutHandler)
+                }</span>
+        }
+        <span class="cov0" title="0">return r</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package router
+
+import (
+        account "GoTransact/apps/accounts/handlers"
+        transaction "GoTransact/apps/transaction/handlers"
+        "GoTransact/middlewares"
+
+        "github.com/gin-gonic/gin"
+)
+
+func Router() *gin.Engine <span class="cov0" title="0">{
+
+        r := gin.Default()
+        // docs.SwaggerInfo.BasePath = "/api"
+
+        r.POST("/api/register", account.Signup_handler)
+        r.POST("/api/login", account.Login_handler)
+        r.GET("/api/confirm-payment", transaction.ConfirmPayment)
+
+        protected := r.Group("/api/protected")
+        protected.Use(middlewares.AuthMiddleware())
+        </span><span class="cov0" title="0">{
+                protected.POST("/post-payment", transaction.PaymentRequest)
+                protected.POST("/logout", account.LogoutHandler)
+        }</span>
+
+        <span class="cov0" title="0">return r</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
